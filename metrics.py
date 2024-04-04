@@ -5,6 +5,7 @@ class MSEWithShift:
     def __init__(self):
         pass
 
+
     def calc(self, arr1, arr2, shift):
         '''
         :param arr1: Array with bigger length

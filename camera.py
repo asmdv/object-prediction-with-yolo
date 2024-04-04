@@ -13,14 +13,14 @@ real_show = True
 model = YOLO('yolov8x.pt')
 
 # Open the video file
-video_path = "trimmed.mp4"
+video_path = "input_videos/trimmed.mp4"
 cap = cv2.VideoCapture(video_path)
 assert cap.isOpened(), "Error reading video file"
 
 # Store the track history
 track_history = defaultdict(lambda: [])
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Define the codec (here, MP4)
-out = cv2.VideoWriter('out.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
+out = cv2.VideoWriter('output_videos/out.mp4', fourcc, cap.get(cv2.CAP_PROP_FPS),
                       (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
 len_past = 5

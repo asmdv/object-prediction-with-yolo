@@ -5,7 +5,7 @@ import cv2
 model = YOLO("yolov8n.pt")
 names = model.model.names
 
-cap = cv2.VideoCapture("trimmed.mp4")
+cap = cv2.VideoCapture("input_videos/trimmed.mp4")
 assert cap.isOpened(), "Error reading video file"
 w, h, fps = (int(cap.get(x)) for x in (cv2.CAP_PROP_FRAME_WIDTH, cv2.CAP_PROP_FRAME_HEIGHT, cv2.CAP_PROP_FPS))
 
