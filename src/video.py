@@ -42,10 +42,7 @@ class VideoYOLO():
                 break
         return frames, end
 
-    def loop(self, t: np.ndarray, t_future: np.ndarray):
-        assert t.shape[1] == 1
-        assert t_future.shape[1] == 1
-
+    def loop(self):
         self.track_history = defaultdict(create_list_dict)
         self.track_predictions = defaultdict(create_list_dict)
         # Loop through the video frames
@@ -66,17 +63,11 @@ class VideoYOLO():
 
                     points = np.array(track[-self.past_frame_len:])
                     if len(points) == self.past_frame_len:
-                        x_points = points[:, [0]]
-                        y_points = points[:, [1]]
-                        self.predictor.fit(t.reshape(-1, 1), x_points)
-                        x_points_future = self.predictor.predict(t_future.reshape(-1, 1))
 
-                        self.predictor.fit(t.reshape(-1, 1), y_points)
-                        y_points_future = self.predictor.predict(t_future.reshape(-1, 1))
-                        future_points = np.hstack((x_points_future, y_points_future)).astype(np.int32).reshape((-1, 1, 2))
-                        track_prediction.append((x_points_future[-1][0], y_points_future[-1][0]))
-                        cv2.polylines(curr_annotated_frame, [future_points], isClosed=False, color=(255, 0, 0), thickness=2)
-                        cv2.circle(curr_annotated_frame, (int(x_points_future[-1][0]), int(y_points_future[-1][0])), radius=10,
+                        future_points = self.predictor.predict(points, self.prediction_frame_len)
+                        track_prediction.append((future_points[:, :, 0][-1][0], future_points[:, :, 1][-1][0]))
+                        cv2.polylines(curr_annotated_frame, [future_points.astype(np.int32)], isClosed=False, color=(255, 0, 0), thickness=2)
+                        cv2.circle(curr_annotated_frame, (int(future_points[:, :, 0][-1][0]), int(future_points[:, :, 1][-1][0])), radius=10,
                                    color=(255, 0, 0), thickness=5)
                         # if past_future_points is not None:
                         #     cv2.polylines(annotated_frame, [past_future_points], isClosed=False, color=(255, 255, 0), thickness=2)
@@ -115,7 +106,7 @@ class VideoYOLO():
 
         t = np.arange(self.past_frame_len, dtype=np.uint8).reshape(-1, 1)
         t_future = np.arange(self.past_frame_len, self.past_frame_len + self.prediction_frame_len).reshape(-1, 1)
-        self.loop(t, t_future)
+        self.loop()
 
     def eval(self, track_id=None):
         metric = MSEWithShift()
