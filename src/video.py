@@ -5,15 +5,20 @@ import cv2
 from sklearn.linear_model import LinearRegression
 import json
 import pickle
+import typing
+
 from metrics import MSEWithShift
+from src.predictorinterface import PredictorInterface
+
 
 def create_list_dict():
     return []
 
 
 class VideoYOLO():
-    def __init__(self, model_name, input=None, output=None, past_frame_len=5, prediction_frame_len=1, show=False, debug=False):
+    def __init__(self, model_name: str, input: str = None, output: str = None, past_frame_len: int = 5, prediction_frame_len: int = 1, show: bool =False, debug: bool =False, predictor: type[PredictorInterface] = None):
         self.model = YOLO(model_name)
+        self.predictor = predictor
         self.show = show
         self.input = input
         self.output = output
@@ -23,6 +28,7 @@ class VideoYOLO():
         self.debug = debug
         self.track_history = None
         self.track_predictions = None
+
     def __read_n_frames(self, n):
         frames = []
         end = False
@@ -36,13 +42,15 @@ class VideoYOLO():
                 break
         return frames, end
 
-    def loop(self, t, t_future):
+    def loop(self, t: np.ndarray, t_future: np.ndarray):
+        assert t.shape[1] == 1
+        assert t_future.shape[1] == 1
+
         self.track_history = defaultdict(create_list_dict)
         self.track_predictions = defaultdict(create_list_dict)
         # Loop through the video frames
         frame_count = 0
         while self.cap.isOpened():
-            # Current frame + prediction frame len
             success, frame = self.cap.read()
             if success:
                 results = self.model.track(frame, persist=True)
@@ -58,15 +66,13 @@ class VideoYOLO():
 
                     points = np.array(track[-self.past_frame_len:])
                     if len(points) == self.past_frame_len:
-                        x_points = points.reshape((-1, 2))[:, 0].reshape(-1, 1)
-                        y_points = points.reshape((-1, 2))[:, 1].reshape(-1, 1)
-                        lin_reg = LinearRegression()
-                        lin_reg.fit(t.reshape(-1, 1), x_points)
-                        x_points_future = lin_reg.predict(t_future.reshape(-1, 1))
+                        x_points = points[:, [0]]
+                        y_points = points[:, [1]]
+                        self.predictor.fit(t.reshape(-1, 1), x_points)
+                        x_points_future = self.predictor.predict(t_future.reshape(-1, 1))
 
-                        lin_reg = LinearRegression()
-                        lin_reg.fit(t.reshape(-1, 1), y_points)
-                        y_points_future = lin_reg.predict(t_future.reshape(-1, 1))
+                        self.predictor.fit(t.reshape(-1, 1), y_points)
+                        y_points_future = self.predictor.predict(t_future.reshape(-1, 1))
                         future_points = np.hstack((x_points_future, y_points_future)).astype(np.int32).reshape((-1, 1, 2))
                         track_prediction.append((x_points_future[-1][0], y_points_future[-1][0]))
                         cv2.polylines(curr_annotated_frame, [future_points], isClosed=False, color=(255, 0, 0), thickness=2)
@@ -90,9 +96,9 @@ class VideoYOLO():
                 break
             frame_count += 1
 
-        with open('track_history.pkl', 'wb') as f:
+        with open('../track_history.pkl', 'wb') as f:
             pickle.dump(self.track_history, f)
-        with open('track_predictions.pkl', 'wb') as f:
+        with open('../track_predictions.pkl', 'wb') as f:
             pickle.dump(self.track_predictions, f)
 
         self.video_writer.release()
@@ -107,8 +113,8 @@ class VideoYOLO():
         self.video_writer = cv2.VideoWriter(self.output, fourcc, self.cap.get(cv2.CAP_PROP_FPS),
                               (int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
-        t = np.arange(self.past_frame_len)
-        t_future = np.arange(self.past_frame_len, self.past_frame_len + self.prediction_frame_len)
+        t = np.arange(self.past_frame_len, dtype=np.uint8).reshape(-1, 1)
+        t_future = np.arange(self.past_frame_len, self.past_frame_len + self.prediction_frame_len).reshape(-1, 1)
         self.loop(t, t_future)
 
     def eval(self, track_id=None):
