@@ -41,19 +41,22 @@ class KalmanFilterPredictor(PredictorInterface):
                         [0., 1.]])
         f.H = np.array([[1., 0.],
                         [0., 1.]])
-        f.P *= 1000.
+        f.P = np.cov(past_points.reshape(2, -1))
         f.R = np.array([[5., 0.],
                         [0., 5.]])
         f.Q = np.eye(2) * 0.1
 
         for i in range(1, past_points.shape[0]):
             z = np.array([[past_points[i][0]], [past_points[i][1]]])
+            print("Past:", z)
             f.update(z)
 
         future_points = []
         for i in range(future_t_n):
             f.predict()
+            print("Future:", f.x)
             future_points.append(f.x)
+        return
         future_points = np.array(future_points).reshape(-1, 1, 2)
         return future_points
 

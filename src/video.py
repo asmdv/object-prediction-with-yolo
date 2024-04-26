@@ -6,6 +6,7 @@ from sklearn.linear_model import LinearRegression
 import json
 import pickle
 import typing
+import torch
 
 from metrics import MSEWithShift
 from src.predictorinterface import PredictorInterface
