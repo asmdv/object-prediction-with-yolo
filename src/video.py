@@ -64,8 +64,10 @@ class VideoYOLO():
 
                     points = np.array(track[-self.past_frame_len:])
                     if len(points) == self.past_frame_len:
-
-                        future_points = self.predictor.predict(points, self.prediction_frame_len)
+                        if (type(self.predictor).__name__ == "LSTMPredictor"):
+                            future_points = self.predictor.predict(np.array(track), self.prediction_frame_len)
+                        else:
+                            future_points = self.predictor.predict(points, self.prediction_frame_len)
                         track_prediction.append((future_points[:, :, 0][-1][0], future_points[:, :, 1][-1][0]))
                         cv2.polylines(curr_annotated_frame, [future_points.astype(np.int32)], isClosed=False, color=(255, 0, 0), thickness=2)
                         cv2.circle(curr_annotated_frame, (int(future_points[:, :, 0][-1][0]), int(future_points[:, :, 1][-1][0])), radius=10,

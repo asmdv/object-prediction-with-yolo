@@ -1,7 +1,13 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from filterpy.kalman import KalmanFilter
+import src.rnn
+from torch import nn
+from sklearn.preprocessing import MinMaxScaler
+
 import torch
+from torch.utils.data import TensorDataset, DataLoader
+
 class PredictorInterface:
     def __int__(self):
         pass
@@ -61,4 +67,37 @@ class KalmanFilterPredictor(PredictorInterface):
         return future_points
 
 
+class LSTMPredictor(PredictorInterface):
+    def __init__(self):
+        pass
+    def predict(self, past_points, window_size):
+        scaler = MinMaxScaler(feature_range=(-1, 1))
+        obj = scaler.fit(past_points)
+        past_points = scaler.fit_transform(past_points)
 
+        past_points = src.rnn.create_windowed_array(past_points, window_size)
+        train_data = torch.tensor(past_points).float()
+        train_dataset = TensorDataset(train_data[:, :-1], train_data[:, -1])
+        train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+        learning_rate = 0.001
+        epochs = 100
+
+        model = src.rnn.LSTMModel(2, 32, 1, 2)
+
+        criterion = nn.MSELoss()
+        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+        for epoch in range(epochs):
+            for i, (data, target) in enumerate(train_loader):
+                outputs = model(data)
+                loss = criterion(outputs, target)
+                # Backward pass and optimize
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                # Print training progress (optional)
+                if (i + 1) % 100 == 0:  # Print every 100 mini-batches
+                    print(f'Epoch [{epoch + 1}/{epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
+        predicted = src.rnn.predict(model, train_data[-window_size:])
+        predicted = predicted.detach().numpy()
+        predicted = obj.inverse_transform(predicted)
+        return predicted.reshape(-1, 1, 2)

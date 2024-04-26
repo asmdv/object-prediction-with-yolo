@@ -7,7 +7,6 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 
-# Function to create windowed array
 def create_windowed_array(data, window_size):
     windows = []
     for i in range(len(data) - window_size + 1):
@@ -18,7 +17,6 @@ def get_google_stock_data(start_date, end_date, split_ratio=0.8):
   google_data = yf.download("GOOG", start=start_date, end=end_date)
 
   data = google_data['Close']
-
   # Scale or normalize the data (replace with your preferred method)
   data = create_windowed_array(data, 10)
 
@@ -56,8 +54,8 @@ class LSTMModel(nn.Module):
 
 # Predict on new data (optional)
 def predict(model, data):
-  # data = torch.tensor(data).float()
-  data = data.unsqueeze(-1)
+  if len(list(data.shape)) == 2:
+    data = data.unsqueeze(-1)
   prediction = model(data)
   return prediction
 
