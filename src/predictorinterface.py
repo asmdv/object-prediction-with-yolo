@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from filterpy.kalman import KalmanFilter
-
+import torch
 class PredictorInterface:
     def __int__(self):
         pass
