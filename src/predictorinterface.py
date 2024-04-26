@@ -71,12 +71,15 @@ class LSTMPredictor(PredictorInterface):
     def __init__(self):
         pass
     def predict(self, past_points, window_size):
+        print(past_points)
         scaler = MinMaxScaler(feature_range=(-1, 1))
         obj = scaler.fit(past_points)
         past_points = scaler.fit_transform(past_points)
 
         past_points = src.rnn.create_windowed_array(past_points, window_size)
+        print(past_points)
         train_data = torch.tensor(past_points).float()
+        print(train_data.shape)
         train_dataset = TensorDataset(train_data[:, :-1], train_data[:, -1])
         train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
         learning_rate = 0.001

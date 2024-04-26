@@ -51,7 +51,7 @@ class VideoYOLO():
         while self.cap.isOpened():
             success, frame = self.cap.read()
             if success:
-                results = self.model.track(frame, persist=True)
+                results = self.model.track(frame, persist=True, verbose=False)
                 boxes = results[0].boxes.xywh.cpu()
                 track_ids = results[0].boxes.id.int().cpu().tolist()
                 curr_annotated_frame = results[0].plot()
@@ -63,11 +63,18 @@ class VideoYOLO():
                     track_prediction = self.track_predictions[track_id]
 
                     points = np.array(track[-self.past_frame_len:])
-                    if len(points) == self.past_frame_len:
-                        if (type(self.predictor).__name__ == "LSTMPredictor"):
+                    draw = False
+                    if (type(self.predictor).__name__ == "LSTMPredictor"):
+                        if (len(track) > self.prediction_frame_len):
+                            print("Track len is ", len(track))
+                            print("Prediction frame len is", self.prediction_frame_len)
                             future_points = self.predictor.predict(np.array(track), self.prediction_frame_len)
-                        else:
+                            draw = True
+
+                    elif len(points) == self.past_frame_len:
+                            draw = True
                             future_points = self.predictor.predict(points, self.prediction_frame_len)
+                    if draw:
                         track_prediction.append((future_points[:, :, 0][-1][0], future_points[:, :, 1][-1][0]))
                         cv2.polylines(curr_annotated_frame, [future_points.astype(np.int32)], isClosed=False, color=(255, 0, 0), thickness=2)
                         cv2.circle(curr_annotated_frame, (int(future_points[:, :, 0][-1][0]), int(future_points[:, :, 1][-1][0])), radius=10,
