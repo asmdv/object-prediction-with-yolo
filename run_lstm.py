@@ -189,6 +189,7 @@ def main(args):
         model.train()
         for data, target in train_loader:
             data, target = data.to(device), target.to(device)
+            model = model.to(device)
             outputs = model(data)
             loss = criterion(outputs, target)
             loss_list.append(loss.item())
