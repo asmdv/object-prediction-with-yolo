@@ -5,6 +5,8 @@ import src.rnn as rnn
 import datetime
 import sys
 import src.predictorinterface as predictorinterface
+
+
 class Tee(object):
     def __init__(self, *files):
         self.files = files
@@ -48,7 +50,10 @@ def change_keys(dictionary, key_transform_func):
 def add_file_variable_name(key, i):
     return tuple(list(key) + [i])
 
+
 def main(args):
+    import torch
+
     experiment_name = create_experiment_path(args)
 
     f = open(f'{experiment_name}/log.txt', 'a')
@@ -59,6 +64,8 @@ def main(args):
     track_history_paths = [f"pickle/track_history_amsterdam_full_000{i}.mp4.pkl" for i in range(7)]
     track_histories = []
     track_histories_sum = {}
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     for counter, track_history_path in enumerate(track_history_paths):
         print(f"Loading {track_history_path}")
@@ -147,8 +154,8 @@ def main(args):
     scaler_test = predictorinterface.MinMaxScalerCustom(-1, 1)
 
 
-    train_data = torch.tensor(sequences)
-    test_data = torch.tensor(test_sequences)
+    train_data = torch.tensor(sequences).to(device)
+    test_data = torch.tensor(test_sequences).to(device)
 
     scaler_train.fit(train_data)
     scaler_train.transform(train_data)
@@ -164,6 +171,7 @@ def main(args):
 
     #
     model = rnn.LSTMModel(input_dim, hidden_dim, num_layers, 2)
+    model = model.to(device)
     # model =
     #
     # Define loss function and optimizer
