@@ -201,6 +201,10 @@ def main(args):
         plt.plot(np.arange(0, len(loss_list)+1, len(train_loader)), test_loss_list)
         plt.savefig(f"{experiment_name}/plots/loss.png")
 
+        torch.save(model.state_dict(), f'{experiment_name}/checkpoint.pth')
+
+    torch.save(model.state_dict(), f'{experiment_name}/final.pth')
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Add two numbers.')
