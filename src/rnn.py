@@ -46,6 +46,10 @@ class LinearRegression(nn.Module):
     def forward(self, x):
         return self.linear(x)
 
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 # Define LSTM model
 class LSTMModel(nn.Module):
   def __init__(self, input_dim, hidden_dim, num_layers, output_dim):
@@ -54,6 +58,7 @@ class LSTMModel(nn.Module):
     self.num_layers = num_layers
     self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True)
     self.fc = nn.Linear(hidden_dim, output_dim)
+    self.to(device)
 
   def forward(self, x):
     batch_size = x.size(0)
