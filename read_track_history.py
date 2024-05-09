@@ -5,6 +5,9 @@ from src.predictorinterface import LinearRegressionPredictor, KalmanFilterPredic
 import custom_metrics
 import json
 import time
+
+def create_list_dict():
+    return []
 def dict_to_tuple(dict):
     l = [v for k, v in dict.items()]
     return tuple(l)
@@ -71,7 +74,7 @@ def main(config_path):
         print(f"Experiment: {experiment}, Time: ", end="")
         t = time.time()
         mse_avg = float(calculate_avg(
-            'track_history.pkl',
+            'track_history_amsterdam-short.mp4.pkl',
             past_len=experiment.past_len,
             future_len=experiment.future_len,
             predictor=experiment.predictor,
@@ -86,7 +89,7 @@ def main(config_path):
             json_file.write(json_string)
 
 if __name__ == "__main__":
-    config_paths = ["configuration-lstm-12-2.12.json", "configuration-lstm-14-2.14.json", "configuration-lstm-16-2.16.json", "configuration-lstm-18-2.18.json", "configuration-lstm-20-2.20.json"]
+    config_paths = ["configuration-linear-regression-2-2.10.json"]
     for config_path in config_paths:
         config_path = f"/Users/asif/progs/02-uni/05-advanced-proj-wang/custom-yolo/config/{config_path}"
         main(config_path)
