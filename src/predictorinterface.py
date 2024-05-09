@@ -1,9 +1,8 @@
 import numpy as np
-from sklearn.linear_model import LinearRegression
+# from sklearn.linear_model import LinearRegression
 from filterpy.kalman import KalmanFilter
 import src.rnn
 from torch import nn
-from sklearn.preprocessing import MinMaxScaler
 
 import torch
 from torch.utils.data import TensorDataset, DataLoader

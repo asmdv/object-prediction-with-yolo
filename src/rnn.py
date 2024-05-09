@@ -1,10 +1,8 @@
 import torch
 from torch import nn
 from torch.utils.data import TensorDataset, DataLoader
-import yfinance as yf
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
 
 def create_windowed_array(data, window_size):
