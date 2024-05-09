@@ -71,12 +71,13 @@ def predict(model, data):
   return prediction
 
 def evaluate_model(model, data_loader, criterion, device=torch.device('cpu')):
+  model = model.to(device)
   model.eval()  # Set the model to evaluation mode
   total_loss = 0.0
   with torch.no_grad():  # Disable gradient calculation for efficiency during testing
     for data, target in data_loader:
       # data = data.unsqueeze(-1)
-      data, target = data.to(device), target.to(device)
+      # data, target = data.to(device), target.to(device)
       outputs = model(data)
       loss = criterion(outputs, target)
       total_loss += loss.item()
