@@ -5,6 +5,9 @@ import src.rnn as rnn
 import datetime
 import sys
 import src.predictorinterface as predictorinterface
+from torch import nn
+from torch.utils.data import TensorDataset, DataLoader
+import matplotlib.pyplot as plt
 
 
 class Tee(object):
@@ -65,7 +68,7 @@ def main(args):
     track_histories = []
     track_histories_sum = {}
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu')
 
     for counter, track_history_path in enumerate(track_history_paths):
         print(f"Loading {track_history_path}")
@@ -89,7 +92,6 @@ def main(args):
         test_track_histories.append(track_histories_sum[test_track_key])
         del track_histories_sum[test_track_key]
 
-    len(track_histories_sum.keys())
     s = 0
     for key in track_histories_sum.keys():
         s += len(track_histories_sum[key])
@@ -131,14 +133,7 @@ def main(args):
 
     test_sequences.shape
 
-    import numpy as np
-    import torch
-    import torch
-    from torch import nn
-    from torch.utils.data import TensorDataset, DataLoader
-    import yfinance as yf
-    import matplotlib.pyplot as plt
-    import numpy as np
+
 
     # Hyperparameters
     learning_rate = args.lr

@@ -48,7 +48,7 @@ class LinearRegression(nn.Module):
 
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 
 # Define LSTM model
 class LSTMModel(nn.Module):
