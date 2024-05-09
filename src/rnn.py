@@ -59,7 +59,6 @@ class LSTMModel(nn.Module):
     self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True)
     self.fc = nn.Linear(hidden_dim, output_dim)
     self.to(device)
-
   def forward(self, x):
     batch_size = x.size(0)
     h0 = torch.zeros(self.num_layers, batch_size, self.hidden_dim)

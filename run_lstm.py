@@ -180,7 +180,7 @@ def main(args):
     loss_list = []
     test_loss_list = []
 
-    test_loss = rnn.evaluate_model(model, test_loader, criterion)
+    test_loss = rnn.evaluate_model(model, test_loader, criterion, device=device)
     print("Test loss: ", test_loss)
     test_loss_list.append(test_loss)
 
@@ -202,7 +202,7 @@ def main(args):
             if (counter + 1) % 1 == 0:  # Print every 100 mini-batches
                 print(f'Epoch [{epoch + 1}/{epochs}], Step [{counter + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
             counter += 1
-        test_loss = rnn.evaluate_model(model, test_loader, criterion)
+        test_loss = rnn.evaluate_model(model, test_loader, criterion, device=device)
         print("Test loss: ", test_loss)
         test_loss_list.append(test_loss)
 
