@@ -1,5 +1,5 @@
 import numpy as np
-
+import torch
 
 class MSEWithShift:
     def __init__(self):
@@ -15,5 +15,5 @@ class MSEWithShift:
         '''
         arr1_trimmed = arr1[shift:len(arr2) + shift]
         arr2_trimmed = arr2
-        mse = np.mean(np.square(arr1_trimmed - arr2_trimmed))
+        mse = torch.mean(torch.square(arr1_trimmed - arr2_trimmed))
         return mse

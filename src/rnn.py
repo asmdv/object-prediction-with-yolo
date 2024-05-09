@@ -13,6 +13,13 @@ def create_windowed_array(data, window_size):
         windows.append(data[i:i+window_size])
     return np.array(windows)
 
+def create_windowed_arrayV2(data, window_size):
+    windows = []
+    for i in range(len(data) - window_size + 1):
+        windows.append(data[i:i+window_size])
+    return torch.stack(windows)
+
+
 def get_google_stock_data(start_date, end_date, split_ratio=0.8):
   google_data = yf.download("GOOG", start=start_date, end=end_date)
 
