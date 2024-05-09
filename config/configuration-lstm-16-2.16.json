@@ -1,0 +1,107 @@
+[
+  {
+    "past_len": 16,
+    "future_len": 2,
+    "predictor": {
+      "name": "LSTMPredictor",
+      "params": {
+        "hidden_dim_size": 32,
+        "num_layers": 1,
+        "lr": 0.001,
+        "epochs": 100
+      }
+    }
+  },
+  {
+    "past_len": 16,
+    "future_len": 4,
+    "predictor": {
+      "name": "LSTMPredictor",
+      "params": {
+        "hidden_dim_size": 32,
+        "num_layers": 1,
+        "lr": 0.001,
+        "epochs": 100
+      }
+    }
+  },
+  {
+    "past_len": 16,
+    "future_len": 6,
+    "predictor": {
+      "name": "LSTMPredictor",
+      "params": {
+        "hidden_dim_size": 32,
+        "num_layers": 1,
+        "lr": 0.001,
+        "epochs": 100
+      }
+    }
+  },
+  {
+    "past_len": 16,
+    "future_len": 8,
+    "predictor": {
+      "name": "LSTMPredictor",
+      "params": {
+        "hidden_dim_size": 32,
+        "num_layers": 1,
+        "lr": 0.001,
+        "epochs": 100
+      }
+    }
+  },
+  {
+    "past_len": 16,
+    "future_len": 10,
+    "predictor": {
+      "name": "LSTMPredictor",
+      "params": {
+        "hidden_dim_size": 32,
+        "num_layers": 1,
+        "lr": 0.001,
+        "epochs": 100
+      }
+    }
+  },
+  {
+    "past_len": 16,
+    "future_len": 12,
+    "predictor": {
+      "name": "LSTMPredictor",
+      "params": {
+        "hidden_dim_size": 32,
+        "num_layers": 1,
+        "lr": 0.001,
+        "epochs": 100
+      }
+    }
+  },
+    {
+    "past_len": 16,
+    "future_len": 14,
+    "predictor": {
+      "name": "LSTMPredictor",
+      "params": {
+        "hidden_dim_size": 32,
+        "num_layers": 1,
+        "lr": 0.001,
+        "epochs": 100
+      }
+    }
+  },
+      {
+    "past_len": 16,
+    "future_len": 16,
+    "predictor": {
+      "name": "LSTMPredictor",
+      "params": {
+        "hidden_dim_size": 32,
+        "num_layers": 1,
+        "lr": 0.001,
+        "epochs": 100
+      }
+    }
+  }
+
+]

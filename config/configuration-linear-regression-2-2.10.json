@@ -1,0 +1,42 @@
+[
+  {
+    "past_len": 2,
+    "future_len": 2,
+    "predictor": {
+      "name": "LinearRegressionPredictor",
+      "params": {}
+    }
+  },
+  {
+    "past_len": 2,
+    "future_len": 4,
+    "predictor": {
+      "name": "LinearRegressionPredictor",
+      "params": {}
+    }
+  },
+    {
+    "past_len": 2,
+    "future_len": 6,
+    "predictor": {
+      "name": "LinearRegressionPredictor",
+      "params": {}
+    }
+  },
+    {
+    "past_len": 2,
+    "future_len": 8,
+    "predictor": {
+      "name": "LinearRegressionPredictor",
+      "params": {}
+    }
+  },
+  {
+    "past_len": 2,
+    "future_len": 10,
+    "predictor": {
+      "name": "LinearRegressionPredictor",
+      "params": {}
+    }
+  }
+]

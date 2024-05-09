@@ -1,0 +1,23 @@
+[
+  {
+    "past_len": 4,
+    "future_len": 3,
+    "predictor": {
+      "name": "LinearRegressionPredictor",
+      "params": {}
+    }
+  },
+  {
+    "past_len": 4,
+    "future_len": 3,
+    "predictor": {
+      "name": "LSTMPredictor",
+      "params": {
+        "hidden_dim_size": 2,
+        "num_layers": 1,
+        "lr": 1,
+        "epochs": 100
+      }
+    }
+  }
+]
