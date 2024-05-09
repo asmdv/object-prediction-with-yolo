@@ -40,7 +40,13 @@ def get_google_stock_data(start_date, end_date, split_ratio=0.8):
   return train_data, test_data, scaler, num_datapoints, split_index  # Include scaler for inverse transformation later
 
 # Example usage
+class LinearRegression(nn.Module):
+    def __init__(self):
+        super(LinearRegression, self).__init__()
+        self.linear = nn.Linear(1, 1)  # One input feature, one output
 
+    def forward(self, x):
+        return self.linear(x)
 
 # Define LSTM model
 class LSTMModel(nn.Module):

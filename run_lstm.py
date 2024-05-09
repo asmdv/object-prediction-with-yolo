@@ -4,6 +4,7 @@ import os
 import src.rnn as rnn
 import datetime
 import sys
+import src.predictorinterface as predictorinterface
 class Tee(object):
     def __init__(self, *files):
         self.files = files
@@ -116,7 +117,7 @@ def main(args):
 
     test_sequences = []
     for track_history in test_track_histories:
-        generated_sequences = generate_sequences(track_history, 10)
+        generated_sequences = generate_sequences(track_history, args.seq_len)
         if len(generated_sequences) > 0:
             test_sequences.append(generated_sequences)
     test_sequences = np.concatenate([seq[:] for seq in test_sequences], axis=0)
@@ -131,7 +132,6 @@ def main(args):
     import yfinance as yf
     import matplotlib.pyplot as plt
     import numpy as np
-    from sklearn.preprocessing import MinMaxScaler
 
     # Hyperparameters
     learning_rate = args.lr
@@ -143,8 +143,19 @@ def main(args):
 
     # test_data = torch.tensor(test_sequences)
     # Convert data to tensors
+    scaler_train = predictorinterface.MinMaxScalerCustom(-1, 1)
+    scaler_test = predictorinterface.MinMaxScalerCustom(-1, 1)
+
+
     train_data = torch.tensor(sequences)
     test_data = torch.tensor(test_sequences)
+
+    scaler_train.fit(train_data)
+    scaler_train.transform(train_data)
+
+    scaler_test.fit(test_data)
+    scaler_test.transform(test_data)
+
 
     train_dataset = TensorDataset(train_data[:, :-1], train_data[:, -1])
     test_dataset = TensorDataset(test_data[:, :-1], test_data[:, -1])
@@ -153,6 +164,7 @@ def main(args):
 
     #
     model = rnn.LSTMModel(input_dim, hidden_dim, num_layers, 2)
+    # model =
     #
     # Define loss function and optimizer
     criterion = nn.MSELoss()
@@ -184,11 +196,10 @@ def main(args):
         print("Test loss: ", test_loss)
         test_loss_list.append(test_loss)
 
-
-
-    plt.plot(np.arange(len(loss_list)), loss_list)
-    plt.plot(np.arange(0, len(loss_list)+1, len(train_loader)), test_loss_list)
-    plt.savefig(f"{experiment_name}/plots/loss.png")
+        plt.figure()
+        plt.plot(np.arange(len(loss_list)), loss_list)
+        plt.plot(np.arange(0, len(loss_list)+1, len(train_loader)), test_loss_list)
+        plt.savefig(f"{experiment_name}/plots/loss.png")
 
 
 if __name__ == "__main__":
@@ -197,7 +208,10 @@ if __name__ == "__main__":
     parser.add_argument('--hidden_dim', type=int, required=True, help='First number')
     parser.add_argument('--num_layers', type=int, help='Second number')
     parser.add_argument('--epochs', type=int, default=100, help='Second number')
-    parser.add_argument('--lr', type=int, default=0.001, help='Second number')
+    parser.add_argument('--lr', type=float, default=0.001, help='Second number')
+    parser.add_argument('--seq_len', type=int, default=10, help='Second number')
+
+
 
     args = parser.parse_args()
 
