@@ -58,7 +58,10 @@ class VideoYOLO():
             if success:
                 results = self.model.track(frame, persist=True, verbose=False)
                 boxes = results[0].boxes.xywh.to(device)
-                track_ids = results[0].boxes.id.int().to(device)
+                track_ids = results[0].boxes.id
+                if track_ids == None:
+                    continue
+                track_ids = track_ids.int().to(device)
                 name_ids = results[0].boxes.cls
                 curr_annotated_frame = results[0].plot()
                 for box, track_id, name_id in zip(boxes, track_ids, name_ids):
@@ -70,32 +73,33 @@ class VideoYOLO():
                     track_prediction = self.track_predictions[(track_id,name)]
                     points = track[-self.past_frame_len:]
                     draw = False
-                    if (type(self.predictor).__name__ == "LSTMPredictor"):
-                        if (len(track) > self.prediction_frame_len):
-                            print("Track len is ", len(track))
-                            print("Prediction frame len is", self.prediction_frame_len)
-                            future_points = self.predictor.predict(torch.stack(track), self.prediction_frame_len)
-                            draw = True
+                    if self.predictor:
+                        if (type(self.predictor).__name__ == "LSTMPredictor"):
+                            if (len(track) > self.prediction_frame_len):
+                                print("Track len is ", len(track))
+                                print("Prediction frame len is", self.prediction_frame_len)
+                                future_points = self.predictor.predict(torch.stack(track), self.prediction_frame_len)
+                                draw = True
 
 
 
-                    elif len(points) == self.past_frame_len:
-                            draw = True
-                            future_points = self.predictor.predict(torch.stack(points), self.prediction_frame_len)
+                        elif len(points) == self.past_frame_len:
+                                draw = True
+                                future_points = self.predictor.predict(torch.stack(points), self.prediction_frame_len)
 
-                    if draw:
-                        track_prediction.append((future_points[:, :, 0][-1][0], future_points[:, :, 1][-1][0]))
-                        cv2.polylines(curr_annotated_frame, [future_points.to(torch.int).numpy()], isClosed=False, color=(255, 0, 0), thickness=2)
-                        cv2.circle(curr_annotated_frame, (int(future_points[:, :, 0][-1][0]), int(future_points[:, :, 1][-1][0])), radius=10,
-                                   color=(255, 0, 0), thickness=5)
-                        # if past_future_points is not None:
-                        #     cv2.polylines(annotated_frame, [past_future_points], isClosed=False, color=(255, 255, 0), thickness=2)
-                        # past_future_points = future_points.copy()
-                    points = torch.stack(points)
-                    points = points.unsqueeze(1)
-                    points = points.to(torch.int).numpy()
-                    cv2.circle(curr_annotated_frame, (int(x), int(y)), radius=0, color=(0, 0, 255), thickness=15)
-                    cv2.polylines(curr_annotated_frame, [points], isClosed=False, color=(230, 230, 230), thickness=2)
+                        if draw:
+                            track_prediction.append((future_points[:, :, 0][-1][0], future_points[:, :, 1][-1][0]))
+                            cv2.polylines(curr_annotated_frame, [future_points.to(torch.int).numpy()], isClosed=False, color=(255, 0, 0), thickness=2)
+                            cv2.circle(curr_annotated_frame, (int(future_points[:, :, 0][-1][0]), int(future_points[:, :, 1][-1][0])), radius=10,
+                                       color=(255, 0, 0), thickness=5)
+                            # if past_future_points is not None:
+                            #     cv2.polylines(annotated_frame, [past_future_points], isClosed=False, color=(255, 255, 0), thickness=2)
+                            # past_future_points = future_points.copy()
+                        points = torch.stack(points)
+                        points = points.unsqueeze(1)
+                        points = points.to(torch.int).numpy()
+                        cv2.circle(curr_annotated_frame, (int(x), int(y)), radius=0, color=(0, 0, 255), thickness=15)
+                        cv2.polylines(curr_annotated_frame, [points], isClosed=False, color=(230, 230, 230), thickness=2)
 
                 if self.show:
                     cv2.imshow("YOLOv8 Tracking", curr_annotated_frame)
