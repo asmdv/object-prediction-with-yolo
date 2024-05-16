@@ -41,7 +41,7 @@ def get_google_stock_data(start_date, end_date, split_ratio=0.8):
 class LinearRegression(nn.Module):
     def __init__(self):
         super(LinearRegression, self).__init__()
-        self.linear = nn.Linear(1, 1)  # One input feature, one output
+        self.linear = nn.Linear(2, 2)  # One input feature, one output
 
     def forward(self, x):
         return self.linear(x)
@@ -78,14 +78,21 @@ def evaluate_model(model, data_loader, criterion, device=torch.device('cpu')):
   model = model.to(device)
   model.eval()  # Set the model to evaluation mode
   total_loss = 0.0
+  total_loss_x = 0.0
+  total_loss_y = 0.0
   with torch.no_grad():  # Disable gradient calculation for efficiency during testing
     for data, target in data_loader:
       # data = data.unsqueeze(-1)
       data, target = data.to(device), target.to(device)
       outputs = model(data)
       loss = criterion(outputs, target)
+      loss_x = criterion(outputs[:, 0], target[:, 0])
+      loss_y = criterion(outputs[:, 1], target[:, 1])
+
       total_loss += loss.item()
-  return total_loss / len(data_loader)
+      total_loss_x += loss_x.item()
+      total_loss_y += loss_y.item()
+  return total_loss / len(data_loader), (total_loss_x / len(data_loader), total_loss_y / len(data_loader))
 
 
 def main():
@@ -136,7 +143,7 @@ def main():
                 print(f'Epoch [{epoch + 1}/{epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
     # Evaluate the model on test data
     # ...
-    test_loss = evaluate_model(model, test_loader, criterion)
+    test_loss, _ = evaluate_model(model, test_loader, criterion)
 
     output = predict(model, test_data[:, :-1])
     output = output.detach().numpy()

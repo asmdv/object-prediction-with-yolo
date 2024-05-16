@@ -204,7 +204,7 @@ def main(args):
     test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
 
     #
-    model = rnn.LSTMModel(input_dim, hidden_dim, num_layers, 2)
+    model = rnn.LinearRegression()
     model = model.to(device)
     # model =
     #
