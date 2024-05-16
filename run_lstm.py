@@ -248,8 +248,11 @@ def main(args):
         torch.save(model.state_dict(), f'{experiment_name}/checkpoint.pth')
 
     torch.save(model.state_dict(), f'{experiment_name}/final.pth')
-    test_loss, _ = rnn.evaluate_model(model, test_loader, criterion, device=device)
+    test_loss, (test_loss_x, test_loss_y) = rnn.evaluate_model(model, test_loader, criterion, device=device)
     print("Test loss:", test_loss)
+    print("Test loss x:", test_loss_x)
+    print("Test loss y:", test_loss_y)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Add two numbers.')
