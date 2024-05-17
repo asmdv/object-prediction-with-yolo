@@ -132,35 +132,32 @@ def main(args):
     print("Test: ", len(test_track_histories_numpy))
 
 
-
-
-    def generate_sequences(data, sequence_length):
+    def generate_sequences(data, sequence_length, future_length):
         sequences = []
-        for i in range(len(data) - sequence_length):
+        for i in range(len(data) - sequence_length - future_length):
             seq = data[i:i+sequence_length]
-            target = data[i+sequence_length]
-            concat_array = np.concatenate((seq, target.reshape(-1, 2)))
+            target = data[i+sequence_length:i+sequence_length+future_length]
+            concat_array = np.concatenate((seq, target))
             sequences.append(concat_array)
         return np.array(sequences)
 
     sequences = []
     for track_history in track_histories_sum_numpy:
-        generated_sequences = generate_sequences(track_history, 10)
+        generated_sequences = generate_sequences(track_history, args.seq_len, args.seq_len)
         if len(generated_sequences) > 0:
             sequences.append(generated_sequences)
     sequences = np.concatenate([seq[:] for seq in sequences], axis=0)
 
-
     val_sequences = []
     for track_history in val_track_histories_numpy:
-        generated_sequences = generate_sequences(track_history, args.seq_len)
+        generated_sequences = generate_sequences(track_history, args.seq_len, args.seq_len)
         if len(generated_sequences) > 0:
             val_sequences.append(generated_sequences)
     val_sequences = np.concatenate([seq[:] for seq in val_sequences], axis=0)
 
     test_sequences = []
     for track_history in test_track_histories_numpy:
-        generated_sequences = generate_sequences(track_history, args.seq_len)
+        generated_sequences = generate_sequences(track_history, args.seq_len, args.seq_len)
         if len(generated_sequences) > 0:
             test_sequences.append(generated_sequences)
     test_sequences = np.concatenate([seq[:] for seq in test_sequences], axis=0)
@@ -195,16 +192,16 @@ def main(args):
     scaler_test.transform(test_data)
 
 
-    train_dataset = TensorDataset(train_data[:, :-1], train_data[:, -1])
-    val_dataset = TensorDataset(val_data[:, :-1], val_data[:, -1])
-    test_dataset = TensorDataset(test_data[:, :-1], test_data[:, -1])
+    train_dataset = TensorDataset(train_data[:, :args.seq_len], train_data[:, args.seq_len:args.seq_len + args.seq_len])
+    val_dataset = TensorDataset(val_data[:, :args.seq_len], val_data[:, args.seq_len: args.seq_len + args.seq_len])
+    test_dataset = TensorDataset(test_data[:, :args.seq_len], test_data[:, args.seq_len: args.seq_len + args.seq_len])
 
     train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=128, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
 
     #
-    model = rnn.LinearRegression()
+    model = rnn.LinearRegressionModel2D(10, 10)
     model = model.to(device)
     # model =
     #
@@ -214,7 +211,7 @@ def main(args):
     loss_list = []
     val_loss_list = []
 
-    val_loss, _ = rnn.evaluate_model(model, val_loader, criterion, device=device)
+    val_loss, _ = rnn.evaluate_modelV2(model, val_loader, criterion, device=device)
     print("Validation loss: ", val_loss)
     val_loss_list.append(val_loss)
 
@@ -223,8 +220,11 @@ def main(args):
         model.train()
         for data, target in train_loader:
             data, target = data.to(device), target.to(device)
+            # print("Data shape", data.shape)
+            # print("Target shape", target.shape)
             model = model.to(device)
             outputs = model(data)
+            # print("Output shape:", outputs.shape)
             loss = criterion(outputs, target)
             loss_list.append(loss.item())
             # Backward pass and optimize
@@ -236,7 +236,7 @@ def main(args):
             if (counter + 1) % 1 == 0:  # Print every 100 mini-batches
                 print(f'Epoch [{epoch + 1}/{epochs}], Step [{counter + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
             counter += 1
-        val_loss, _ = rnn.evaluate_model(model, val_loader, criterion, device=device)
+        val_loss, _ = rnn.evaluate_modelV2(model, val_loader, criterion, device=device)
         print("Validation loss: ", val_loss)
         val_loss_list.append(val_loss)
 
@@ -245,17 +245,21 @@ def main(args):
         plt.plot(np.arange(0, len(loss_list)+1, len(train_loader)), val_loss_list)
         plt.savefig(f"{experiment_name}/plots/loss.png")
 
+        torch.save({"loss_list": loss_list, "val_loss_list": val_loss_list, "len_train_loader": len(train_loader)}, f'{experiment_name}/loss.dat')
         torch.save(model.state_dict(), f'{experiment_name}/checkpoint.pth')
 
     torch.save(model.state_dict(), f'{experiment_name}/final.pth')
-    test_loss, _ = rnn.evaluate_model(model, test_loader, criterion, device=device)
+    test_loss, (test_loss_x, test_loss_y) = rnn.evaluate_modelV2(model, test_loader, criterion, device=device)
     print("Test loss:", test_loss)
+    print("Test loss x:", test_loss_x)
+    print("Test loss y:", test_loss_y)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Add two numbers.')
-    parser.add_argument('--model', type=str, default="lstm", help='First number')
-    parser.add_argument('--hidden_dim', type=int, required=True, help='First number')
-    parser.add_argument('--num_layers', type=int, help='Second number')
+    parser.add_argument('--model', type=str, default="regression", help='First number')
+    parser.add_argument('--hidden_dim', type=int, default=None, help='First number')
+    parser.add_argument('--num_layers', type=int, default=None, help='Second number')
     parser.add_argument('--epochs', type=int, default=100, help='Second number')
     parser.add_argument('--lr', type=float, default=0.001, help='Second number')
     parser.add_argument('--seq_len', type=int, default=10, help='Second number')
